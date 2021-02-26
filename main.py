@@ -1,9 +1,8 @@
-# TODO - Add Refresh Button in Chat
-# TODO - Fix Bug Where Chat Page Automatically sends Empty Messages When Opened
 # TODO - Add Support For Downloading Individual Files
 # TODO - Add Support For Downloading Versions
 # TODO - Add An Option To Download A Project, Which will download All files in the Latest Version of the Project
 
+from pathlib import Path
 import datetime
 import os
 import json
@@ -85,6 +84,8 @@ class Main(MDApp):
     title = "CodeX Base"
     icon = "codex.png"
 
+    home = str(Path.home())
+    downloads_folder = os.path.join(home, "Downloads", "CodeX Base")
     project_name = StringProperty()
     version_name = StringProperty()
     file_name = StringProperty()
@@ -354,19 +355,6 @@ class Main(MDApp):
         except:
             pass
 
-        # projects = database.child("Projects").get()
-        # self.root.ids.projects_panel.clear_widgets()
-        # try:
-        #     for every_project in projects.each():
-        #         each_project = every_project.val()
-        #         each_project_name = each_project["Project Name"]
-        #
-        #         self.root.ids.projects_panel.add_widget(
-        #             OneLineListItem(text=each_project_name,
-        #                             on_release=lambda x: self.project_clicked(x.text)))
-        # except:
-        #     pass
-
     def update_version_panel(self):
         self.root.ids.version_panel.clear_widgets()
 
@@ -550,6 +538,68 @@ class Main(MDApp):
         toast("Message Sent")
 
         self.update_chats()
+
+    def download_project(self, project_name):
+        """
+        Called When User Presses The 'Download' Button on the Version Screen,
+
+        Function:
+            Download The Latest Version Of The Project Name Provided,
+            By Calling 'download_version' with Latest Version of the Project
+        """
+        pass
+
+    def download_version(self, project_name, version):
+        """
+        Called By the 'download_project' function to download the Latest Version of a Project
+        Or When User Presses The 'Download' Button on the Files Screen
+
+        Function:
+            Download The Provided Version Of The Project Name Provided,
+            By Calling 'download_file' with Provided Version of the Project
+        """
+        pass
+
+    def download_file(self, project_name, version, file_name):
+        """
+        Called By the 'download_version' function to download the Files of a certain Version of a Project,
+        Or When User Presses The 'Download' Button on the File Content Screen
+
+        Function:
+            Download The Provided File Of The Version and Project Name Provided
+        """
+
+        download_file_name = os.path.join(self.downloads_folder, file_name)
+
+        if not os.path.exists(self.downloads_folder):
+            os.mkdir(self.downloads_folder)
+
+        if os.path.exists(download_file_name):
+            self.ask_delete_file_dialog = MDDialog(
+                title=f"The File {file_name} already exists in The Downloads Folder(~/Downloads/CodeX Base)\nWhat Should Be Done?",
+                type="confirmation",
+                auto_dismiss=False,
+                buttons=[
+                    MDFlatButton(text="Abort",
+                                 on_release=self.close_ask_delete_file_dialog),
+                    MDRaisedButton(text="Delete The File in The Downloads Folder and Proceed with Installation",
+                                   on_release=lambda x: self.proceed_with_download(
+                                       file_name))
+                ])
+            self.ask_delete_file_dialog.open()
+
+        elif not os.path.exists(download_file_name):
+            file = open(download_file_name, "w+")
+            storage.child().download(f"Projects/{project_name}/Versions/{version}/{file_name}", download_file_name)
+            toast("File Downloaded in the Downloads Folder(~/Downloads/CodeX Base)")
+
+    def close_ask_delete_file_dialog(self, *args):
+        self.ask_delete_file_dialog.dismiss()
+
+    def proceed_with_download(self, file):
+        self.close_ask_delete_file_dialog()
+        os.remove(os.path.join(self.downloads_folder, file))
+        self.download_file(self.project_name, self.version_name, self.file_name)
 
 
 KV = '''
@@ -1073,8 +1123,13 @@ ScreenManager:
             pos_hint: {"center_x": 0.03, "center_y": 0.87}
             on_release:
                 screen_manager.current = "File Screen"
-                # app.update_main_panel()
 
+        MDRectangleFlatIconButton:
+            text: "Download File"
+            icon: "download"
+            pos_hint: {"center_x": 0.2, "center_y": 0.87}
+            on_release:
+                screen_manager.current = app.download_file(app.project_name, app.version_name, app.file_name)
 
         MDTextField:
             id: file_text
