@@ -1,5 +1,6 @@
 # TODO - Add Support For Downloading Versions
 # TODO - Add An Option To Download A Project, Which will download All files in the Latest Version of the Project
+# TODO - Add Support For Deleting Files/Projects/Versions
 
 from pathlib import Path
 import datetime
@@ -1126,9 +1127,19 @@ ScreenManager:
         MDRectangleFlatIconButton:
             text: "Download File"
             icon: "download"
-            pos_hint: {"center_x": 0.2, "center_y": 0.87}
+            pos_hint: {"center_x": 0.75, "center_y": 0.87}
             on_release:
                 screen_manager.current = app.download_file(app.project_name, app.version_name, app.file_name)
+
+        MDRectangleFlatIconButton:
+            text: "Delete File"
+            icon: "delete"
+            text_color: (1, 0, 0, 1)
+            # md_bg_color: (1, 0, 0, 1)
+            pos_hint: {"center_x": 0.875, "center_y": 0.87}
+            # on_release:
+                # screen_manager.current = app.download_file(app.project_name, app.version_name, app.file_name)
+
 
         MDTextField:
             id: file_text
