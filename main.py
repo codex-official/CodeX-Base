@@ -370,7 +370,7 @@ class Main(MDApp):
                     each_value.name = each_value.name.replace(
                         f"Projects/{self.project_name}/Versions/", "")
                     splited_files = each_value.name.split("/")
-                    print(f"Splited Files: {splited_files}")
+                    print(f"Splitted Files: {splited_files}")
                     each_value.name = splited_files[0]
                     print(f"Each Value.name: {each_value.name}")
                     versions.append(each_value.name)
@@ -1070,6 +1070,24 @@ ScreenManager:
                 screen_manager.current = "MainPanel"
                 # app.update_main_panel()
 
+        MDRectangleFlatIconButton:
+            text: "Download Project"
+            icon: "download"
+            pos_hint: {"center_x": 0.75, "center_y": 0.75}
+            increment_width: "164dp"
+            on_release:
+                app.download_project(app.project_name)
+
+        MDRectangleFlatIconButton:
+            text: "Delete Project"
+            icon: "delete"
+            text_color: (1, 0, 0, 1)
+            # md_bg_color: (1, 0, 0, 1)
+            pos_hint: {"center_x": 0.875, "center_y": 0.75}
+            # on_release:
+                # screen_manager.current = app.download_file(app.project_name, app.version_name, app.file_name)
+
+
         MDRectangleFlatButton:
             text: "Make New Version"
             pos_hint: {"center_x": 0.1  , "center_y": 0.75}
@@ -1109,6 +1127,24 @@ ScreenManager:
                 app.new_file_dialog()
                 app.update_file_panel()
 
+        MDRectangleFlatIconButton:
+            text: "Download Version"
+            icon: "download"
+            increment_width: "166dp"
+            pos_hint: {"center_x": 0.75, "center_y": 0.75}
+            on_release:
+                screen_manager.current = app.download_file(app.project_name, app.version_name, app.file_name)
+
+        MDRectangleFlatIconButton:
+            text: "Delete Version"
+            icon: "delete"
+            text_color: (1, 0, 0, 1)
+            # md_bg_color: (1, 0, 0, 1)
+            pos_hint: {"center_x": 0.875, "center_y": 0.75}
+            # on_release:
+                # screen_manager.current = app.download_file(app.project_name, app.version_name, app.file_name)
+
+
     Screen:
         name: "Every File Screen"
         id: every_file_screen
@@ -1127,6 +1163,7 @@ ScreenManager:
         MDRectangleFlatIconButton:
             text: "Download File"
             icon: "download"
+            increment_width: "164dp"
             pos_hint: {"center_x": 0.75, "center_y": 0.87}
             on_release:
                 screen_manager.current = app.download_file(app.project_name, app.version_name, app.file_name)
