@@ -623,7 +623,7 @@ class Main(MDApp):
 
         toast(f"Downloaded project {project_name} in The Downloads Folder({self.downloads_folder})")
 
-    def download_version(self, project_name, version, do_toast=True):
+    def download_version(self, project_name, version, do_toast=True, location=downloads_folder):
         """
         Called By the 'download_project' function to download the Latest Version of a Project
         Or When User Presses The 'Download' Button on the Files Screen
@@ -639,7 +639,7 @@ class Main(MDApp):
 
         for file in files:
             print(f"Files: {file}")
-            self.download_file(project_name, version, file, do_toast=False)
+            self.download_file(project_name, version, file, do_toast=False, location=location)
 
         if do_toast:
             toast(f"Downloaded {version} of Project '{project_name}' in the Downloads Folder({self.downloads_folder})")
