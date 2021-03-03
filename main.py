@@ -337,9 +337,9 @@ class Main(MDApp):
                     print(f"After Processing: {each_value.name}")
                     each_value.name = each_value.name.replace(
                         f"Projects/", "")
-                    splited_files = each_value.name.split("/")
-                    print(f"Splited Files: {splited_files}")
-                    each_value.name = splited_files[0]
+                    splitted_files = each_value.name.split("/")
+                    print(f"Splitted Files: {splitted_files}")
+                    each_value.name = splitted_files[0]
                     print(f"Each Value.name: {each_value.name}")
                     projects.append(each_value.name)
 
@@ -539,6 +539,76 @@ class Main(MDApp):
 
         self.update_chats()
 
+    def get_latest_version(self, project):
+        """
+        Called By The 'download_project' Function
+
+        Function:
+            Get The Latest Version Of a Specified Project
+        """
+
+        latest_version = ""
+        data = storage.list_files()
+        versions_dir = f"Projects/{project}/Versions/"
+        unsorted_versions = []
+        versions = []
+
+        for each_value in data:
+            value = str(each_value.name)
+
+            if versions_dir in value:
+                if versions_dir == value:
+                    pass
+                else:
+                    value = value.replace(versions_dir, "")
+                    unsorted_versions.append(value)
+
+            print(value)
+
+        for each_version in unsorted_versions:
+            splitted_versions = each_version.split("/")
+            version = splitted_versions[0]
+            version = version.replace("Version", "")
+            version = float(version)
+            print(version)
+            versions.append(version)
+
+        # Remove Duplicates
+        versions = list(dict.fromkeys(versions))
+
+        # Get The Largest Item
+        latest_version = str(max(versions))
+
+        print(f"Latest Version: {latest_version}")
+
+        return latest_version
+
+    def get_all_files(self, project_name, version):
+        """
+        Called By The 'download_version' Function
+
+        Function:
+            Get All The Files Of a Specified Version of a Project
+        """
+
+        files = []
+        data = storage.list_files()
+        directory = f"Projects/{project_name}/Versions/{version}/"
+
+        for each_value in data:
+            value = str(each_value.name)
+
+            if directory in value:
+                if directory == value:
+                    pass
+                else:
+                    value = value.replace(directory, "")
+                    files.append(value)
+
+            print(value)
+
+        return files
+
     def download_project(self, project_name):
         """
         Called When User Presses The 'Download' Button on the Version Screen,
@@ -547,9 +617,13 @@ class Main(MDApp):
             Download The Latest Version Of The Project Name Provided,
             By Calling 'download_version' with Latest Version of the Project
         """
-        pass
 
-    def download_version(self, project_name, version):
+        latest_version = self.get_latest_version(project_name)
+        self.download_version(project_name, latest_version, do_toast=False)
+
+        toast(f"Downloaded project {project_name} in The Downloads Folder{self.downloads_folder}")
+
+    def download_version(self, project_name, version, do_toast=True):
         """
         Called By the 'download_project' function to download the Latest Version of a Project
         Or When User Presses The 'Download' Button on the Files Screen
@@ -558,9 +632,17 @@ class Main(MDApp):
             Download The Provided Version Of The Project Name Provided,
             By Calling 'download_file' with Provided Version of the Project
         """
-        pass
 
-    def download_file(self, project_name, version, file_name):
+        files = self.get_all_files(project_name, version)
+
+        for file in files:
+            print(f"Files: {file}")
+            self.download_file(project_name, version, file, do_toast=False)
+
+        if do_toast:
+            toast(f"Downloaded {version} of Project '{project_name}' in the Downloads Folder({self.downloads_folder})")
+
+    def download_file(self, project_name, version, file_name, do_toast=True):
         """
         Called By the 'download_version' function to download the Files of a certain Version of a Project,
         Or When User Presses The 'Download' Button on the File Content Screen
@@ -568,7 +650,7 @@ class Main(MDApp):
         Function:
             Download The Provided File Of The Version and Project Name Provided
         """
-
+        print(version)
         download_file_name = os.path.join(self.downloads_folder, file_name)
 
         if not os.path.exists(self.downloads_folder):
@@ -591,7 +673,9 @@ class Main(MDApp):
         elif not os.path.exists(download_file_name):
             file = open(download_file_name, "w+")
             storage.child().download(f"Projects/{project_name}/Versions/{version}/{file_name}", download_file_name)
-            toast("File Downloaded in the Downloads Folder(~/Downloads/CodeX Base)")
+
+            if do_toast:
+                toast(f"File Downloaded in the Downloads Folder({self.downloads_folder})")
 
     def close_ask_delete_file_dialog(self, *args):
         self.ask_delete_file_dialog.dismiss()
@@ -1087,6 +1171,15 @@ ScreenManager:
             # on_release:
                 # screen_manager.current = app.download_file(app.project_name, app.version_name, app.file_name)
 
+        # MDRectangleFlatIconButton:
+        #     text: "Delete Project"
+        #     icon: "delete"
+        #     text_color: (1, 1, 1, 1)
+        #     md_bg_color: (1, 0, 0, 1)
+        #     pos_hint: {"center_x": 0.875, "center_y": 0.75}
+            # on_release:
+                # screen_manager.current = app.download_file(app.project_name, app.version_name, app.file_name)
+
 
         MDRectangleFlatButton:
             text: "Make New Version"
@@ -1133,7 +1226,7 @@ ScreenManager:
             increment_width: "166dp"
             pos_hint: {"center_x": 0.75, "center_y": 0.75}
             on_release:
-                screen_manager.current = app.download_file(app.project_name, app.version_name, app.file_name)
+                app.download_version(app.project_name, app.version_name)
 
         MDRectangleFlatIconButton:
             text: "Delete Version"
@@ -1166,7 +1259,7 @@ ScreenManager:
             increment_width: "164dp"
             pos_hint: {"center_x": 0.75, "center_y": 0.87}
             on_release:
-                screen_manager.current = app.download_file(app.project_name, app.version_name, app.file_name)
+                app.download_file(app.project_name, app.version_name, app.file_name)
 
         MDRectangleFlatIconButton:
             text: "Delete File"
