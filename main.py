@@ -682,10 +682,10 @@ class Main(MDApp):
     def close_ask_delete_file_dialog(self, *args):
         self.ask_delete_file_dialog.dismiss()
 
-    def proceed_with_download(self, file):
+    def proceed_with_download(self, file, location=downloads_folder):
         self.close_ask_delete_file_dialog()
-        os.remove(os.path.join(self.downloads_folder, file))
-        self.download_file(self.project_name, self.version_name, self.file_name)
+        os.remove(os.path.join(location, file))
+        self.download_file(self.project_name, self.version_name, self.file_name, location=location)
 
 
 KV = '''
