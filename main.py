@@ -1,7 +1,3 @@
-# TODO - Add Support For Downloading Versions
-# TODO - Add An Option To Download A Project, Which will download All files in the Latest Version of the Project
-# TODO - Add Support For Deleting Files/Projects/Versions
-
 from pathlib import Path
 import datetime
 import os
@@ -619,9 +615,13 @@ class Main(MDApp):
         """
 
         latest_version = self.get_latest_version(project_name)
+        latest_version = f"Version{latest_version}"
+
+        print(f"Latest Version: {latest_version}")
+
         self.download_version(project_name, latest_version, do_toast=False)
 
-        toast(f"Downloaded project {project_name} in The Downloads Folder{self.downloads_folder}")
+        toast(f"Downloaded project {project_name} in The Downloads Folder({self.downloads_folder})")
 
     def download_version(self, project_name, version, do_toast=True):
         """
@@ -632,6 +632,8 @@ class Main(MDApp):
             Download The Provided Version Of The Project Name Provided,
             By Calling 'download_file' with Provided Version of the Project
         """
+
+        print(f"Downloading {version} of Project '{project_name}'")
 
         files = self.get_all_files(project_name, version)
 
