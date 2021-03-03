@@ -644,7 +644,7 @@ class Main(MDApp):
         if do_toast:
             toast(f"Downloaded {version} of Project '{project_name}' in the Downloads Folder({self.downloads_folder})")
 
-    def download_file(self, project_name, version, file_name, do_toast=True):
+    def download_file(self, project_name, version, file_name, do_toast=True, location=downloads_folder):
         """
         Called By the 'download_version' function to download the Files of a certain Version of a Project,
         Or When User Presses The 'Download' Button on the File Content Screen
@@ -653,14 +653,14 @@ class Main(MDApp):
             Download The Provided File Of The Version and Project Name Provided
         """
         print(version)
-        download_file_name = os.path.join(self.downloads_folder, file_name)
+        download_file_name = os.path.join(location, file_name)
 
-        if not os.path.exists(self.downloads_folder):
-            os.mkdir(self.downloads_folder)
+        if not os.path.exists(location):
+            os.mkdir(location)
 
         if os.path.exists(download_file_name):
             self.ask_delete_file_dialog = MDDialog(
-                title=f"The File {file_name} already exists in The Downloads Folder(~/Downloads/CodeX Base)\nWhat Should Be Done?",
+                title=f"The File {file_name} already exists in The Downloads Folder({self.downloads_folder})\nWhat Should Be Done?",
                 type="confirmation",
                 auto_dismiss=False,
                 buttons=[
