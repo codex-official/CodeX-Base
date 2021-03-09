@@ -32,9 +32,6 @@ auth = CodeX_Base.auth()
 storage = CodeX_Base.storage()
 
 
-# Time = datetime.datetime.now().strftime("%H:%M:%S")
-
-
 class FileDialogContent(BoxLayout):
     def __init__(self):
         super(FileDialogContent, self).__init__()
@@ -190,15 +187,6 @@ class Main(MDApp):
         except:
             toast("An Error Occurred.Please Try Again")
 
-        # project_name = self.root.ids.project_name.text
-        #
-        # add_data = {"Project Name": str(project_name)}
-        # add_data45 = {"Version1": {"File": f"Projects/{project_name}/Versions/Version1"}}
-        # database.child("Projects").child(project_name).set(add_data)
-        # database.child("Projects").child(project_name).child("Versions").set(add_data45)
-        # database.child("Projects").child(project_name).child("Latest Version").set("1")
-        #
-        # toast(f"New project created by the name '{project_name}'")
 
     def new_version_dialog(self):
         project_name = self.project_name
@@ -376,7 +364,6 @@ class Main(MDApp):
 
             for every_version in versions:
                 if every_version != "":
-                    # print(every_file)
                     self.root.ids.version_panel.add_widget(
                         OneLineListItem(text=every_version,
                                         on_release=lambda x: self.version_clicked(x.text)
@@ -384,20 +371,6 @@ class Main(MDApp):
         except:
             pass
 
-        # versions = database.child("Projects").child(self.project_name).child("Versions").get()
-        # self.root.ids.version_panel.clear_widgets()
-        #
-        # try:
-        #     for every_version in versions.each():
-        #         version = every_version.key()
-        #         print(version)
-        #
-        #         self.root.ids.version_panel.add_widget(
-        #             OneLineListItem(text=version,
-        #                             on_release=lambda x: self.version_clicked(x.text)
-        #                             ))
-        # except:
-        #     pass
 
     def update_file_panel(self):
         self.root.ids.file_panel.clear_widgets()
@@ -488,12 +461,6 @@ class Main(MDApp):
         file.close()
 
         self.new_file(self.file_name, create_new_file=False)
-        # storage.child("Projects").child(self.project_name).child("Versions").child(self.version_name).child(
-        #     self.file_name).put(f"temp/{self.file_name}")
-
-        # os.remove(os.path.join("temp", self.file_name))
-
-        # toast("Saved File.")
 
     """
     Chat Functions Here
@@ -619,7 +586,10 @@ class Main(MDApp):
 
         print(f"Latest Version: {latest_version}")
 
-        self.download_version(project_name, latest_version, do_toast=False)
+        location = os.path.join(self.downloads_folder, "Projects", project_name, latest_version)
+        print(location)
+
+        self.download_version(project_name, latest_version, do_toast=False, location=location)
 
         toast(f"Downloaded project {project_name} in The Downloads Folder({self.downloads_folder})")
 
@@ -635,6 +605,9 @@ class Main(MDApp):
 
         print(f"Downloading {version} of Project '{project_name}'")
 
+        if location == self.downloads_folder:
+            location = os.path.join(self.downloads_folder, "Projects", project_name, version)
+
         files = self.get_all_files(project_name, version)
 
         for file in files:
@@ -644,7 +617,7 @@ class Main(MDApp):
         if do_toast:
             toast(f"Downloaded {version} of Project '{project_name}' in the Downloads Folder({self.downloads_folder})")
 
-    def download_file(self, project_name, version, file_name, do_toast=True, location=downloads_folder):
+    def download_file(self, project_name, version, file_name, do_toast=True, location=os.path.join(downloads_folder, "Files")):
         """
         Called By the 'download_version' function to download the Files of a certain Version of a Project,
         Or When User Presses The 'Download' Button on the File Content Screen
@@ -653,40 +626,21 @@ class Main(MDApp):
             Download The Provided File Of The Version and Project Name Provided
         """
         print(version)
+
         download_file_name = os.path.join(location, file_name)
+        print(download_file_name)
 
-        if not os.path.exists(location):
-            os.mkdir(location)
+        try:
+            os.makedirs(location)
+        except FileExistsError:
+            pass
 
-        if os.path.exists(download_file_name):
-            self.ask_delete_file_dialog = MDDialog(
-                title=f"The File {file_name} already exists in The Downloads Folder({self.downloads_folder})\nWhat Should Be Done?",
-                type="confirmation",
-                auto_dismiss=False,
-                buttons=[
-                    MDFlatButton(text="Abort",
-                                 on_release=self.close_ask_delete_file_dialog),
-                    MDRaisedButton(text="Delete The File in The Downloads Folder and Proceed with Installation",
-                                   on_release=lambda x: self.proceed_with_download(
-                                       file_name))
-                ])
-            self.ask_delete_file_dialog.open()
 
-        elif not os.path.exists(download_file_name):
-            file = open(download_file_name, "w+")
-            storage.child().download(f"Projects/{project_name}/Versions/{version}/{file_name}", download_file_name)
+        file = open(download_file_name, "w+")
+        storage.child().download(f"Projects/{project_name}/Versions/{version}/{file_name}", download_file_name)
 
-            if do_toast:
-                toast(f"File Downloaded in the Downloads Folder({self.downloads_folder})")
-
-    def close_ask_delete_file_dialog(self, *args):
-        self.ask_delete_file_dialog.dismiss()
-
-    def proceed_with_download(self, file, location=downloads_folder):
-        self.close_ask_delete_file_dialog()
-        os.remove(os.path.join(location, file))
-        self.download_file(self.project_name, self.version_name, self.file_name, location=location)
-
+        if do_toast:
+            toast(f"File Downloaded in the Downloads Folder({self.downloads_folder})")
 
 KV = '''
 
@@ -1154,7 +1108,6 @@ ScreenManager:
             pos_hint: {"center_x": 0.03, "center_y": 0.87}
             on_release:
                 screen_manager.current = "MainPanel"
-                # app.update_main_panel()
 
         MDRectangleFlatIconButton:
             text: "Download Project"
