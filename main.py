@@ -171,12 +171,12 @@ class Main(MDApp):
 
             elif (project_name != "") and (starter_file != ""):
                 # Temp File
-                open(starter_file, "a").close()
+                open(f"temp/{starter_file}", "a").close()
 
                 storage.child("Projects").child(project_name).child("Versions").child("Version1.0").child(
-                    starter_file).put(starter_file)
+                    starter_file).put(f"temp/{starter_file}")
 
-                os.remove(starter_file)
+                os.remove(f"temp/{starter_file}")
 
                 add_data = {"Project Name": str(project_name)}
                 database.child("Projects").child(project_name).set(add_data)
@@ -234,11 +234,11 @@ class Main(MDApp):
 
                 if version_exists == "False":
                     # Temp File
-                    open(starter_file, "a").close()
+                    open(f"temp/{starter_file}", "a").close()
 
                     storage.child("Projects").child(self.project_name).child("Versions").child(
-                        f"Version{version}").child(starter_file).put(starter_file)
-                    os.remove(starter_file)
+                        f"Version{version}").child(starter_file).put(f"temp/{starter_file}")
+                    os.remove(f"temp/{starter_file}")
 
                     self.update_version_panel()
                     self.close_version_dialog()
